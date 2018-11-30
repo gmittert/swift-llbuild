@@ -2179,12 +2179,7 @@ public:
       }
       inheritEnv = value == "true";
     } else if (name == "working-directory") {
-#if __APPLE__
       workingDirectory = value;
-#else
-      ctx.error("working-directory unsupported on this platform");
-      return false;
-#endif
     } else if (name == "control-enabled") {
       if (value != "true" && value != "false") {
         ctx.error("invalid value: '" + value + "' for attribute '" +

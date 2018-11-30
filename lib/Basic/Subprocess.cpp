@@ -56,6 +56,28 @@ int pthread_fchdir_np(int fd)
 
 #endif
 
+#ifndef __GLIBC_PREREQ
+#define __GLIBC_PREREQ(maj, min) 0
+#endif
+
+#ifndef HAVE_POSIX_SPAWN_CHDIR
+#if defined(__sun) || \
+  __GLIBC_PREREQ(2, 29)
+#define HAVE_POSIX_SPAWN_CHDIR 1
+#else
+#define HAVE_POSIX_SPAWN_CHDIR 0
+#endif
+#endif
+
+// Any other POSIX platform returns ENOSYS (Function not implemented),
+// to simplify the fallback logic around the call site.
+#if !HAVE_POSIX_SPAWN_CHDIR
+static int posix_spawn_file_actions_addchdir_np(posix_spawn_file_actions_t * __restrict file_actions,
+                                                const char * __restrict path) {
+  return ENOSYS;
+}
+#endif
+
 using namespace llbuild;
 using namespace llbuild::basic;
 
@@ -376,6 +398,14 @@ void llbuild::basic::spawnProcess(
   posix_spawn_file_actions_t fileActions;
   posix_spawn_file_actions_init(&fileActions);
 
+  bool usePosixSpawnChdirFallback = false;
+  const auto workingDir = attr.workingDir.str();
+  if (!workingDir.empty() &&
+      posix_spawn_file_actions_addchdir_np(&fileActions, workingDir.c_str()) == ENOSYS) {
+    // Not implemented on this platform, fall back to a thread-local approach later.
+    usePosixSpawnChdirFallback = true;
+  }
+
   // Open /dev/null as stdin.
   posix_spawn_file_actions_addopen(
       &fileActions, 0, "/dev/null", O_RDONLY, 0);
@@ -465,28 +495,33 @@ void llbuild::basic::spawnProcess(
     if (!wasCancelled) {
       int result = 0;
 
+      llvm::Twine alternateErrorString;
+      if (usePosixSpawnChdirFallback) {
 #ifdef __APPLE__
-      thread_local std::string threadWorkingDir;
+        thread_local std::string threadWorkingDir;
 
-      if (attr.workingDir.empty()) {
-        if (!threadWorkingDir.empty()) {
-          pthread_fchdir_np(-1);
-          threadWorkingDir.clear();
-        }
-      } else {
-        if (threadWorkingDir != attr.workingDir) {
-          const auto workingDir = attr.workingDir.str();
-          if (pthread_chdir_np(workingDir.c_str()) == -1) {
-            result = errno;
-          } else {
-            threadWorkingDir = attr.workingDir;
+        if (workingDir.empty()) {
+          if (!threadWorkingDir.empty()) {
+            pthread_fchdir_np(-1);
+            threadWorkingDir.clear();
+          }
+        } else {
+          if (threadWorkingDir != workingDir) {
+            if (pthread_chdir_np(workingDir.c_str()) == -1) {
+              result = errno;
+            } else {
+              threadWorkingDir = workingDir;
+            }
           }
         }
-      }
+#elif defined(__linux__)
+        const int ret = unshare(CLONE_FS);
+        result = ret != 0 ? ret : chdir(workingDir.c_str());
 #else
-      assert(attr.workingDir.empty() &&
-             "setting process working directory unsupported");
+        alternateErrorString = Twine("working-directory unsupported on this platform");
+        result = -1;
 #endif
+      }
 
       if (result == 0) {
         result = posix_spawn(&pid, args[0], /*file_actions=*/&fileActions,
@@ -497,7 +532,9 @@ void llbuild::basic::spawnProcess(
       if (result != 0) {
         auto processResult = ProcessResult::makeFailed();
         delegate.processHadError(ctx, handle,
-            Twine("unable to spawn process (") + strerror(result) + ")");
+            !alternateErrorString.isTriviallyEmpty()
+              ? alternateErrorString
+              : Twine("unable to spawn process (") + strerror(result) + ")");
         delegate.processFinished(ctx, handle, processResult);
         pid = -1;
       } else {

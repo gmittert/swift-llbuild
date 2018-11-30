@@ -7,8 +7,6 @@
 # RUN: test -d %t.build/subdir
 # RUN: test -f %t.build/subdir/file
 # RUN: test -f %t.build/file
-#
-# REQUIRES: platform=Darwin
 
 client:
   name: basic
