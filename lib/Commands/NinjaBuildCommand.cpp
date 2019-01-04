@@ -1126,11 +1126,20 @@ buildCommand(BuildContext& context, ninja::Command* command) {
 #endif
       }
 
+ #if defined(_WIN32)
+ StringRef args[] = {
+        "cmd.exe",
+        "/C",
+        command->getCommandString().c_str()
+      };
+
+#else
       StringRef args[] = {
         "/bin/sh",
         "-c",
         command->getCommandString().c_str()
       };
+#endif
 
       context.jobQueue->executeProcess(qctx, args, {}, true, {true}, {
         [&](ProcessResult result) {

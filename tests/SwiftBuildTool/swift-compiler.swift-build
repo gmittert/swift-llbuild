@@ -2,7 +2,7 @@
 #
 # RUN: rm -rf %t.build
 # RUN: mkdir -p %t.build/temps/nested
-# RUN: sed -e "s#SOURCEDIR#%S#g" -e "s#TMPDIR#%t#g" < %s > %t.build/build.swift-build
+# RUN: sed -e "s#SOURCEDIR#%/S#g" -e "s#TMPDIR#%/t#g" < %s > %t.build/build.swift-build
 # RUN: %{swift-build-tool} --no-db --chdir %t.build > %t.out
 # RUN: %{swift-build-tool} --no-db -v --chdir %t.build > %t-verbose.out
 # RUN: %{FileCheck} --input-file=%t.out %s
@@ -30,13 +30,13 @@ commands:
   C1:
     tool: swift-compiler
     outputs: ["<output>"]
-    executable: SOURCEDIR/Inputs/pseudo-swiftc
+    executable: python
     module-name: Foo
     module-output-path: Foo.swiftmodule
     sources: ["s 1.swift", "s 2.swift"]
     import-paths: ["import A", "import B"]
     # FIXME: We can't use spaces in filenames here yet, because of a Swift compiler bug.
     objects: ["temps/s1.o", "temps/nested/s2.o"]
-    other-args: ["-Onone", "-I", "path with spaces"]
+    other-args: ["SOURCEDIR/Inputs/pseudo-swiftc", "-Onone", "-I", "path with spaces"]
     temps-path: temps
     is-library: true

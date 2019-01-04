@@ -55,7 +55,11 @@ bool ExecutionQueue::executeShellCommand(QueueJobContext* context,
                                          StringRef command) {
   SmallString<1024> commandStorage(command);
   std::vector<StringRef> commandLine(
+#if defined(_WIN32)
+                                     { "cmd.exe", "/c", commandStorage.c_str() });
+#else
                                      { "/bin/sh", "-c", commandStorage.c_str() });
+#endif
   return executeProcess(context, commandLine) == ProcessStatus::Succeeded;
 }
 
