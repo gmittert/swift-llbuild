@@ -4013,7 +4013,7 @@ void BuildSystem::resetForBuild() {
 // This function checks if the given path is prefixed by another path.
 bool llbuild::buildsystem::pathIsPrefixedByPath(std::string path, std::string prefixPath) {
   static char path_separator = llvm::sys::path::get_separator()[0];
-  auto res = std::mismatch(prefixPath.begin(), prefixPath.end(), path.begin());
+  auto res = std::mismatch(prefixPath.begin(), prefixPath.end(), path.begin(), path.end());
   // Check if `prefixPath` has been exhausted or just a separator remains.
   bool isPrefix = res.first == prefixPath.end() || (*(res.first++) == path_separator);
   // Check if `path` has been exhausted or just a separator remains.
