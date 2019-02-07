@@ -1,43 +1,36 @@
-// This is not a real config.
+/*===------- llvm/Config/llvm-config.h - llvm configuration -------*- C -*-===*/
+/*                                                                            */
+/*                     The LLVM Compiler Infrastructure                       */
+/*                                                                            */
+/* This file is distributed under the University of Illinois Open Source      */
+/* License. See LICENSE.TXT for details.                                      */
+/*                                                                            */
+/*===----------------------------------------------------------------------===*/
 
-#ifndef LLBUILD_LLVM_LLVM_CONFIG_H
-#define LLBUILD_LLVM_LLVM_CONFIG_H
+/* This file enumerates variables from the LLVM configuration so that they
+   can be in exported headers and won't override package specific directives.
+   This is a C header that can be included in the llvm-c headers. */
 
-/* Installation directory for binary executables */
-/* #undef LLVM_BINDIR */
+#ifndef LLVM_CONFIG_H
+#define LLVM_CONFIG_H
 
-/* Time at which LLVM was configured */
-/* #undef LLVM_CONFIGTIME */
+/* Define if LLVM_ENABLE_DUMP is enabled */
+/* #undef LLVM_ENABLE_DUMP */
 
-/* Installation directory for data files */
-/* #undef LLVM_DATADIR */
+/* Define if we link Polly to the tools */
+/* #undef LINK_POLLY_INTO_TOOLS */
 
 /* Target triple LLVM will generate code for by default */
 #define LLVM_DEFAULT_TARGET_TRIPLE ""
 
-/* Installation directory for documentation */
-/* #undef LLVM_DOCSDIR */
-
 /* Define if threads enabled */
 #define LLVM_ENABLE_THREADS 1
-
-/* Installation directory for config files */
-/* #undef LLVM_ETCDIR */
 
 /* Has gcc/MSVC atomic intrinsics */
 #define LLVM_HAS_ATOMICS 1
 
 /* Host triple LLVM will be executed on */
 #define LLVM_HOST_TRIPLE ""
-
-/* Installation directory for include files */
-/* #undef LLVM_INCLUDEDIR */
-
-/* Installation directory for .info files */
-/* #undef LLVM_INFODIR */
-
-/* Installation directory for man pages */
-/* #undef LLVM_MANDIR */
 
 /* LLVM architecture name for the native architecture, if available */
 #define LLVM_NATIVE_ARCH X86
@@ -65,26 +58,30 @@
 #define LLVM_ON_UNIX 1
 #endif
 
-/* Installation prefix directory */
-#define LLVM_PREFIX "/usr/local"
-
 /* Define if we have the Intel JIT API runtime support library */
-/* #undef LLVM_USE_INTEL_JITEVENTS */
+#define LLVM_USE_INTEL_JITEVENTS 0
 
 /* Define if we have the oprofile JIT-support library */
-/* #undef LLVM_USE_OPROFILE */
+#define LLVM_USE_OPROFILE 0
+
+/* Define if we have the perf JIT-support library */
+#define LLVM_USE_PERF 0
 
 /* Major version of the LLVM API */
-#define LLVM_VERSION_MAJOR 3
+#define LLVM_VERSION_MAJOR 7
 
 /* Minor version of the LLVM API */
-#define LLVM_VERSION_MINOR 7
+#define LLVM_VERSION_MINOR 0
 
 /* Patch version of the LLVM API */
 #define LLVM_VERSION_PATCH 0
 
 /* LLVM version string */
-#define LLVM_VERSION_STRING "3.7.0svn"
+#define LLVM_VERSION_STRING "7.0.0svn"
+
+/* Whether LLVM records statistics for use with GetStatistics(),
+ * PrintStatistics() or PrintStatisticsJSON()
+ */
+#define LLVM_FORCE_ENABLE_STATS 0
 
 #endif
-

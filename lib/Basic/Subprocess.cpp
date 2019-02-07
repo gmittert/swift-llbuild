@@ -416,10 +416,12 @@ void llbuild::basic::spawnProcess(
   // gets pulled in.
   std::for_each(std::begin(argsStorage) + 1, std::end(argsStorage),
                 [&args](auto arg) { args += arg + " "; });
-  args.pop_back();
+  if (!args.empty()) {
+    args.pop_back();
+  }
   // Convert the command line string to utf16
-  llvm::SmallVector<UTF16, 20> u16Executable;
-  llvm::SmallVector<UTF16, 20> u16CmdLine;
+  llvm::SmallVector<llvm::UTF16, 20> u16Executable;
+  llvm::SmallVector<llvm::UTF16, 20> u16CmdLine;
   llvm::convertUTF8ToUTF16String(argsStorage[0], u16Executable);
   llvm::convertUTF8ToUTF16String(args, u16CmdLine);
 #else
@@ -512,7 +514,7 @@ void llbuild::basic::spawnProcess(
 #endif
 
 #if defined(_WIN32)
-  llvm::SmallVector<UTF16, 20> u16Cwd;
+  llvm::SmallVector<llvm::UTF16, 20> u16Cwd;
   std::string workingDir = attr.workingDir.str();
   if (!workingDir.empty()) {
     llvm::convertUTF8ToUTF16String(workingDir, u16Cwd);
@@ -603,6 +605,7 @@ void llbuild::basic::spawnProcess(
     if (!res.getError()) {
       argsStorage[0] = *res;
 #if defined(_WIN32)
+      u16Executable.clear();
       llvm::convertUTF8ToUTF16String(argsStorage[0], u16Executable);
 #else
       args[0] = argsStorage[0].c_str();

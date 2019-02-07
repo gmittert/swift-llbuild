@@ -2,22 +2,34 @@
 append_if(CXX_SUPPORTS_IMPLICIT_FALLTHROUGH_FLAG "-Wno-implicit-fallthrough" CMAKE_CXX_FLAGS)
 
 add_llbuild_library(llvmSupport
+APFloat.cpp
+APInt.cpp
+APSInt.cpp
 Allocator.cpp
 Atomic.cpp
-ConvertUTF.c
+Chrono.cpp
+CommandLine.cpp
+ConvertUTF.cpp
 ConvertUTFWrapper.cpp
+DJB.cpp
 Debug.cpp
 Errno.cpp
+Error.cpp
 ErrorHandling.cpp
 FileUtilities.cpp
+FoldingSet.cpp
+FormatVariadic.cpp
 Hashing.cpp
-IntrusiveRefCntPtr.cpp
+Host.cpp
 Locale.cpp
+MD5.cpp
 ManagedStatic.cpp
 MathExtras.cpp
 Memory.cpp
 MemoryBuffer.cpp
 Mutex.cpp
+NativeFormatting.cpp
+Options.cpp
 Path.cpp
 Process.cpp
 Program.cpp
@@ -28,16 +40,20 @@ SourceMgr.cpp
 StringExtras.cpp
 StringMap.cpp
 StringRef.cpp
+StringSaver.cpp
+TargetParser.cpp
 Threading.cpp
-TimeValue.cpp
+Triple.cpp
 Twine.cpp
 Unicode.cpp
 Valgrind.cpp
 YAMLParser.cpp
 circular_raw_ostream.cpp
 raw_ostream.cpp
-)
+  )
 
+
+target_link_libraries(llvmSupport LLVMDemangle)
 if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
   target_link_libraries(llvmSupport execinfo pthread)
 endif()

@@ -13,43 +13,55 @@ import shutil
 import sys
 
 # ADT types.
-ADT_imports = ['iterator_range', 'Hashing' 'None', 'Optional', 'StringExtras',
-               'STLExtras']
+ADT_imports = ['iterator', 'iterator_range', 'APFloat', 'APInt', 'APSInt',
+               'AllocatorList', 'EpochTracker', 'Hashing', 'None', 'Optional',
+               'StringExtras', 'STLExtras']
 
 # ADT basic data structures.
-ADT_imports += ['ArrayRef', 'PointerIntPair', 'StringRef', 'StringSwitch',
-                'Twine', 'IntrusiveRefCntPtr', 'ilist', 'ilist_node']
+ADT_imports += ['ArrayRef', 'PointerIntPair', 'PointerUnion', 'StringRef',
+                'StringSwitch', 'Triple', 'Twine', 'IntrusiveRefCntPtr',
+                'ilist', 'ilist_base', 'ilist_node', 'ilist_node_base',
+                'ilist_node_options', 'simple_ilist', 'ilist_iterator']
 
 # ADT Mapping structures.
-ADT_imports += ['DenseMap', 'DenseMapInfo', 'StringMap']
+ADT_imports += ['DenseSet', 'DenseMap', 'DenseMapInfo', 'FoldingSet', 'StringMap']
 
 # ADT "Small" structures.
-ADT_imports += ['SmallPtrSet', 'SmallString', 'SmallVector']
+ADT_imports += ['SmallPtrSet', 'SmallSet', 'SmallString', 'SmallVector',]
 
 # ADT Algorithms.
 ADT_imports += ['edit_distance']
 
+Demangle_imports = ['Demangle']
+
 # Support types and infrastructure.
-Support_imports = [
-    'AlignOf', 'Allocator', 'Atomic', 'CBindingWrapping', 'Casting', 'Compiler',
-    'Endian', 'Errno', 'ErrorHandling', 'Errc', 'ErrorOr', 'Format',
-    'ManagedStatic', 'MathExtras', 'Mutex', 'MutexGuard', 'Memory',
-    'MemoryBuffer', 'PointerLikeTypeTraits', 'Recycler', 'SwapByteOrder',
-    'TimeValue', 'Threading', 'Unicode', 'UniqueLock', 'Unix', 'WindowsError',
-    'Valgrind', 'circular_raw_ostream', 'raw_ostream', 'type_traits', 
-    'WindowsSupport']
+Support_imports = [ 'AlignOf', 'Allocator', 'Atomic', 'CBindingWrapping',
+                    'Casting', 'Compiler', 'CommandLine', 'ConvertUTF', 'DJB',
+                    'Endian', 'Errno', 'Error', 'ErrorHandling', 'Errc',
+                    'ErrorOr', 'Format', 'ManagedStatic', 'MathExtras', 'MD5',
+                    'Mutex', 'MutexGuard', 'Memory', 'MemoryBuffer',
+                    'PointerLikeTypeTraits', 'Recycler', 'ReverseIteration',
+                    'SmallVectorMemoryBuffer', 'StringSaver', 'SwapByteOrder',
+                    'TimeValue', 'Threading', 'Unicode', 'UniqueLock',
+                    'WindowsError', 'Valgrind', 'circular_raw_ostream',
+                    'raw_ostream', 'type_traits']
 
 # Stuff we don't want, but have to pull in.
-Support_imports += [
-    'COFF', 'ConvertUTF', 'ConvertUTFWrapper', 'Debug', 'FileSystem',
-    'FileUtilities', 'Host', 'Locale', 'Path', 'Process', 'Program', 'SMLoc',
-    'SourceMgr', 'Signals', 'Unicode', 'UnicodeCharRanges']
+Support_imports += [ 'APFloat', 'ARMTargetParser', 'ARMBuildAttributes',
+                     'AArch64TargetParser', 'Chrono', 'DataTypes', 'Debug',
+                     'FileSystem', 'FileUtilities', 'FormatCommon',
+                     'FormatProviders',
+                     'FormatVariadic','FormatVariadicDetails', 'Host',
+                     'Locale', 'MemAlloc', 'NativeFormatting', 'Options',
+                     'Path', 'Process', 'Program', 'SMLoc', 'SourceMgr',
+                     'Signals', 'Support', 'TargetParser', 'Types', 'Unicode',
+                     'UnicodeCharRanges', 'X86TargetParser']
 
 # Support data structures.
 Support_imports += ['YAMLParser']
 
 # Source files to exclude.
-Support_source_excludes = set(['Host'])
+Support_source_excludes = set()
 
 llvm_srcroot = None
 llbuild_srcroot = None
@@ -68,7 +80,7 @@ def mkdir_p(path):
             raise
 
 def copyfile(src, dst):
-    note("cp %r %r" % (src, dst))
+    #note("cp %r %r" % (src, dst))
     shutil.copyfile(src, dst)
 
 def main():
@@ -85,10 +97,15 @@ def main():
 
     def import_header(dir, name):
         src = os.path.join(llvm_srcroot, 'include', 'llvm', dir, name)
+        c_src = os.path.join(llvm_srcroot, 'include', 'llvm-c', name)
         if os.path.exists(src):
             dst = os.path.join(llbuild_srcroot, 'include', 'llvm', dir, name)
             mkdir_p(os.path.dirname(dst))
             copyfile(src, dst)
+        if os.path.exists(c_src):
+            dst = os.path.join(llbuild_srcroot, 'include', 'llvm-c', name)
+            mkdir_p(os.path.dirname(dst))
+            copyfile(c_src, dst)
 
     def import_source(dir, name):
         src = os.path.join(llvm_srcroot, 'lib', dir, name)
@@ -96,6 +113,8 @@ def main():
             dst = os.path.join(llbuild_srcroot, 'lib', 'llvm', dir, name)
             mkdir_p(os.path.dirname(dst))
             copyfile(src, dst)
+        #else:
+            #print("WARN: Failed to find: " + src)
 
     print "note: importing from %r to %r" % (llvm_srcroot, llbuild_srcroot)
 
@@ -106,6 +125,7 @@ def main():
             import_source('Support', name+'.cpp')
     for name in Support_imports:
         import_header('Support', name+'.h')
+        import_header('Support', name+'.def')
         if name not in Support_source_excludes:
             import_source('Support', name+'.c')
             import_source('Support', name+'.cpp')
@@ -113,6 +133,24 @@ def main():
             import_source('Support', os.path.join('Unix', name+'.inc'))
             import_source('Support', os.path.join('Windows', name+'.h'))
             import_source('Support', os.path.join('Windows', name+'.inc'))
-        
+    for name in Demangle_imports:
+        import_header('Demangle', name+'.h')
+        import_source('Demangle', name+'.cpp')
+
+    # Copy over all of demangle
+    demangle_src = os.path.join(llvm_srcroot, 'lib', 'Demangle')
+    demangle_dest = os.path.join(llbuild_srcroot, 'lib', 'llvm', 'Demangle')
+    shutil.rmtree(demangle_dest)
+    shutil.copytree(demangle_src, demangle_dest)
+
+    # Write our own CMakeLists.txt for it
+    cmakefile = """add_llbuild_library(LLVMDemangle
+    ItaniumDemangle.cpp
+    MicrosoftDemangle.cpp
+)
+"""
+    with open(os.path.join(demangle_dest, 'CMakeLists.txt'), 'w') as f:
+        f.write(cmakefile)
+
 if __name__ == '__main__':
     main()
