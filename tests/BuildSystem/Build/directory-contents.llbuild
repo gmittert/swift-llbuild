@@ -51,7 +51,7 @@
 #
 # CHECK-MODIFIED2: { "new-rule", "[[RULE_NAME:R[0-9]+]]", "Ddir" },
 # CHECK-MODIFIED2: { "rule-does-not-need-to-run", "[[RULE_NAME]]" },
-# CHECK-MODIFIED2: { "new-rule", "[[RULE_NAME2:R[0-9]+]]", "Ndir/file" },
+# CHECK-MODIFIED2: { "new-rule", "[[RULE_NAME2:R[0-9]+]]", "Ndir{{[/\\]}}file" },
 # CHECK-MODIFIED2: { "rule-needs-to-run", "[[RULE_NAME2]]", "invalid-value" },
 
 client:

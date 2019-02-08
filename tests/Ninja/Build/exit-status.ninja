@@ -1,4 +1,6 @@
 # Verify that we exit with an appropriate code when there are build failures.
+#
+# REQUIRES: shell
 
 # RUN: rm -rf %t.build
 # RUN: mkdir -p %t.build

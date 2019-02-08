@@ -1,4 +1,5 @@
 # Check that we report a proper exit status with failing commands.
+# REQUIRES: shell
 #
 # RUN: rm -rf %t.build
 # RUN: mkdir -p %t.build

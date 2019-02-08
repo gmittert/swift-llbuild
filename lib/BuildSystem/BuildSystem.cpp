@@ -2085,8 +2085,13 @@ public:
       // When provided as a scalar string, we default to executing using the
       // shell.
       args.clear();
+#if defined(_WIN32)
+      args.push_back(ctx.getDelegate().getInternedString("cmd.exe"));
+      args.push_back(ctx.getDelegate().getInternedString("/c"));
+#else
       args.push_back(ctx.getDelegate().getInternedString("/bin/sh"));
       args.push_back(ctx.getDelegate().getInternedString("-c"));
+#endif
       args.push_back(ctx.getDelegate().getInternedString(value));
     } else if (name == "deps") {
       depsPath = value;

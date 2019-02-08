@@ -1,4 +1,6 @@
 # Check that only stdin, stdout, and stderr are inherited.
+#
+# REQUIRES: shell
 
 # We explicitly attach an extra FD to 4 when we run, to ensure the subprocess
 # has an extra FD it needs to clear.

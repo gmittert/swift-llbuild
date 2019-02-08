@@ -68,8 +68,7 @@ commands:
     outputs: ["output"]
     # We report the dependency twice just to cover the duplicate dependency scenario.
     args:
-      "echo \"output: generated-input generated-input\" > output.d &&
-       cp generated-input output"
+      "echo \"output: generated-input generated-input\" > output.d && cp generated-input output"
     deps: output.d
     deps-style: makefile
 

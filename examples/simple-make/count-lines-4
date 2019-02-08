@@ -104,8 +104,12 @@ class CountSourceLinesRule(SimpleAsyncRule):
                     output_path = os.path.join(self.path, input + ".wc")
                     self.output_paths.append(output_path)
 
-                    cmd = ['/bin/sh', '-c', "wc -l < %s > %s" % (input_path,
-                                                              output_path)]
+                    if platform.system() == 'Windows':
+                        cmd = ['cmd.exe, '/c', "wc -l < %s > %s" % (input_path,
+                                output_path)]
+                    else:
+                        cmd = ['/bin/sh', '-c', "wc -l < %s > %s" % (input_path,
+                                output_path)]
                     engine.task_needs_input(
                         self, SpawnJobRule.asKey(cmd, [input_path],
                                                  [output_path]),

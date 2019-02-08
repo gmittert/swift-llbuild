@@ -48,5 +48,6 @@ commands:
     tool: shell
     inputs: ["output-1"]
     outputs: ["output"]
+    description: cat output-1 > output
     args: cat output-1 > output
 

@@ -81,7 +81,7 @@ commands:
     description: DIR-CREATOR
     inputs: ["<D-file>"]
     outputs: ["dir"]
-    args: mkdir -p dir
+    args: ["mkdir", "-p", "dir"]
   C.D-dir:
     tool: shell
     description: DTS-DIR-CHANGED

@@ -3,13 +3,13 @@
 # mkdir on WSL gives the new folder 0777 permissions, which break this test. This is because
 # the WSL file system doesn't support permissions: https://github.com/Microsoft/BashOnWindows/issues/1801
 # See https://github.com/Microsoft/BashOnWindows/issues/1801
-# XFAIL: windows_subsystem_linux
+# XFAIL: windows_subsystem_linux, platform=Windows
 # RUN: rm -rf %t.build
 # RUN: mkdir -p %t.build
 # RUN: cp %s %t.build/build.llbuild
 # RUN: %{llbuild} buildsystem build --serial --chdir %t.build > %t.out
 # RUN: %{FileCheck} --input-file=%t.out %s
-# RUN: %S/Inputs/get-file-permissions %t.build/subdir/subdir2 > %t.permissions
+# RUN: python %S/Inputs/get-file-permissions %t.build/subdir/subdir2 > %t.permissions
 # RUN: %{FileCheck} --input-file=%t.permissions --check-prefix=CHECK-PERMISSIONS %s
 #
 # CHECK: ECHO

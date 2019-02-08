@@ -1,4 +1,6 @@
 # Verify that we buffer command output, by using the same trick as our parallel test.
+# Requires bash
+# UNSUPPORTED: platform=Windows
 
 # RUN: rm -rf %t.build
 # RUN: mkdir -p %t.build

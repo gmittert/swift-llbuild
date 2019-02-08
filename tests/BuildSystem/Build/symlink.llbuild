@@ -1,5 +1,8 @@
 # Check the 'symlink' tool.
 #
+# msys "test -L" is unable to detect windows symlinks
+# UNSUPPORTED: platform=Windows
+#
 # RUN: rm -rf %t.build
 # RUN: mkdir -p %t.build
 # RUN: cp %s %t.build/build.llbuild

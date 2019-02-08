@@ -17,9 +17,13 @@ namespace llbuild {
 namespace basic {
 
 void appendShellEscapedString(llvm::raw_ostream& os, StringRef string) {
-
+#if defined (_WIN32)
+  const std::string blacklist = "()%!^\"<>&|";
+  auto pos = string.find_first_of(blacklist);
+#else
   static const std::string whitelist = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_/:@#%+=.,";
   auto pos = string.find_first_not_of(whitelist);
+#endif
 
   // We don't need any escaping just append the string and return.
   if (pos == std::string::npos) {
@@ -28,17 +32,22 @@ void appendShellEscapedString(llvm::raw_ostream& os, StringRef string) {
   }
 
 #if defined(_WIN32)
-  std::string escQuote = "\"";
+  // We surround the string with double quotes and a escape all characters
+  // inside with ^.
+  os << "^\"";
+  for (auto& c : string) {
+    if (blacklist.find(c) != std::string::npos)
+      os << "^";
+    os << c;
+  }
+  os << "^\"";
 #else
   std::string escQuote = "'";
-#endif
   // We only need to escape the single quote, if it isn't present we can
   // escape using single quotes.
   auto singleQuotePos = string.find_first_of(escQuote, pos);
   if (singleQuotePos == std::string::npos) {
-    os << escQuote;
-    os << string;
-    os << escQuote;
+    os << escQuote << string << escQuote;
     return;
   }
 
@@ -47,12 +56,13 @@ void appendShellEscapedString(llvm::raw_ostream& os, StringRef string) {
   os << string.slice(0, singleQuotePos);
   for (auto idx = singleQuotePos; idx < string.size(); idx++) {
     if (string[idx] == escQuote[0]) {
-      os << escQuote << "\\" << escQuote << escQuote;
+      os << escQuote;
     } else {
       os << string[idx];
     }
   }
   os << escQuote;
+#endif
 }
 
 std::string shellEscaped(StringRef string) {

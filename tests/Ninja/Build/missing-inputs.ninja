@@ -1,4 +1,5 @@
 # Check the handling of missing inputs.
+# REQUIRES: shell
 
 # Check that we don't build a command with a missing input, and that we properly
 # report the exit status as a failure.

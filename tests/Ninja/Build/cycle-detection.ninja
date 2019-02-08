@@ -1,4 +1,6 @@
 # Check that we report cycles.
+#
+# REQUIRES: shell
 
 # RUN: rm -rf %t.build
 # RUN: mkdir -p %t.build

@@ -1,4 +1,5 @@
 # Check the -t targets tool.
+# REQUIRES: shell
 
 # Check the default behavior.
 #
