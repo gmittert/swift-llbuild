@@ -18,15 +18,17 @@ using namespace llbuild;
 using namespace llbuild::basic;
 
 namespace {
-  TEST(POSIXEnvironmentTest, basic) {
-    POSIXEnvironment env;
-    env.setIfMissing("a", "aValue");
-    env.setIfMissing("b", "bValue");
-    env.setIfMissing("a", "NOT HERE");
+#if !defined(_WIN32)
+TEST(POSIXEnvironmentTest, basic) {
+  POSIXEnvironment env;
+  env.setIfMissing("a", "aValue");
+  env.setIfMissing("b", "bValue");
+  env.setIfMissing("a", "NOT HERE");
 
-    auto result = env.getEnvp();
-    EXPECT_EQ(StringRef(result[0]), "a=aValue");
-    EXPECT_EQ(StringRef(result[1]), "b=bValue");
-    EXPECT_EQ(result[2], nullptr);
+  auto result = env.getEnvp();
+  EXPECT_EQ(StringRef(result[0]), "a=aValue");
+  EXPECT_EQ(StringRef(result[1]), "b=bValue");
+  EXPECT_EQ(result[2], nullptr);
   }
+#endif
 }
