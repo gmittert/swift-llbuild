@@ -17,7 +17,9 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/raw_ostream.h"
 
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <dlfcn.h>
+#endif
 
 using namespace llbuild;
 using namespace llbuild::basic;
@@ -92,6 +94,7 @@ BuildSystemExtensionManager::lookupByCommandPath(StringRef path) {
     return {};
   }
 
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
   // Load the plugin.
   auto handle = dlopen(extensionPath.c_str(), RTLD_LAZY);
   if (!handle) {
@@ -114,8 +117,28 @@ BuildSystemExtensionManager::lookupByCommandPath(StringRef path) {
     dlclose(handle);
     return {};
   }
+#else
+  HMODULE hModule = LoadLibraryA(extensionPath.c_str());
+  if (hModule == NULL) {
+    return {};
+  }
+
+  BuildSystemExtension *(*registrationFn)(void) =
+      reinterpret_cast<decltype(registrationFn)>(GetProcAddress(hModule,
+                                                                "initialize_llbuild_buildsystem_extension_v0"));
+  if (!registrationFn) {
+    FreeLibrary(hModule);
+    return {};
+  }
+
+  BuildSystemExtension *extension = registrationFn();
+  if (!extension) {
+    FreeLibrary(hModule);
+    return {};
+  }
+#endif
 
   extensions[path] = std::unique_ptr<BuildSystemExtension>(extension);
   return extension;
 }
-  
+
